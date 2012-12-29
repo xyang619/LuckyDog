@@ -1,11 +1,8 @@
-
 /*
  * MainFrame.java
  *
  * Created on Dec 28, 2012, 12:40:12 PM
  */
-
-package cn.ac.picb.ui;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
