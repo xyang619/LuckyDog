@@ -1,7 +1,7 @@
 LuckyDog
 ========
 
-A java GUI program to random pickup one individual as award 
+A java GUI program to random pickup one individual as a lucky dog
 
 User Guidance:
 
