@@ -1,18 +1,25 @@
+
 /*
  * MainFrame.java
  *
  * Created on Dec 28, 2012, 12:40:12 PM
  */
 
+package cn.ac.picb.ui;
+
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.Vector;
 
 import javax.swing.ImageIcon;
@@ -32,6 +39,9 @@ import javax.swing.WindowConstants;
 
 import org.jdesktop.layout.GroupLayout;
 import org.jdesktop.layout.LayoutStyle;
+//import javax.swing.UIManager;
+//import javax.swing.UIManager.LookAndFeelInfo;
+//import javax.swing.UnsupportedLookAndFeelException;
 
 /**
  *
@@ -63,11 +73,13 @@ public class MainFrame extends JFrame {
         jMenuBar1 = new JMenuBar();
         jMenu1 = new JMenu();
         loadMenuItem = new JMenuItem();
+        saveMenuItem = new JMenuItem();
         jSeparator1 = new Separator();
         exitMenuItem = new JMenuItem();
         jMenu2 = new JMenu();
         aboutMenuItem = new JMenuItem();
         
+        setResizable(false);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         congLabel.setFont(new java.awt.Font("Lucida Grande", 1, 32)); // NOI18N
@@ -87,11 +99,11 @@ public class MainFrame extends JFrame {
                 .add(jPanel1Layout.createParallelGroup(GroupLayout.LEADING)
                     .add(jPanel1Layout.createSequentialGroup()
                         .addContainerGap()
-                        .add(congLabel, GroupLayout.DEFAULT_SIZE, 779, Short.MAX_VALUE))
+                        .add(congLabel, GroupLayout.DEFAULT_SIZE, 772, Short.MAX_VALUE))
                     .add(jPanel1Layout.createSequentialGroup()
-                        .add(270, 270, 270)
-                        .add(picLabel, GroupLayout.DEFAULT_SIZE, 268, Short.MAX_VALUE)
-                        .add(261, 261, 261)))
+                        //.add(270, 270, 270)
+                        .add(picLabel, GroupLayout.DEFAULT_SIZE, 772, Short.MAX_VALUE)
+                        ))//.add(261, 261, 261)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -154,6 +166,17 @@ public class MainFrame extends JFrame {
             }
         });
         jMenu1.add(loadMenuItem);
+        
+        saveMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK));
+        saveMenuItem.setText("Save");
+        saveMenuItem.setEnabled(false);
+        saveMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                saveMenuItemActionPerformed(evt);
+            }
+        });
+        jMenu1.add(saveMenuItem);
+        
         jMenu1.add(jSeparator1);
 
         exitMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_MASK));
@@ -205,11 +228,16 @@ public class MainFrame extends JFrame {
 
     private void stopButtonActionPerformed(ActionEvent evt) {
         thread.changeFlagStop();
-        String congStr = "Congratulate " + congLabel.getText().toUpperCase();
+        String congStr = "Congratulate " + names.get(index).toUpperCase();
         congLabel.setForeground(Color.RED);
         congLabel.setText(congStr);
+        if(selected==null)
+            selected = new Vector<String>();
+        selected.add(names.get(index));
+        isSaved = false;
+        saveMenuItem.setEnabled(true);
         names.removeElementAt(index);//remove the individual has been chosen
-      startButton.setEnabled(true);
+    	startButton.setEnabled(true);
         stopButton.setEnabled(false);
         //JOptionPane.showMessageDialog(this, "Congratulations to "+congLabel.getText()+" !" );
         
@@ -238,6 +266,8 @@ public class MainFrame extends JFrame {
 
     private void loadMenuItemActionPerformed(ActionEvent evt) {
         JFileChooser jfc = new JFileChooser();
+        File curDirectory = new File(".");
+        jfc.setCurrentDirectory(curDirectory); //set current directory as default
         int retVal = jfc.showOpenDialog(this);
         if( retVal==JFileChooser.APPROVE_OPTION){
         	File file = jfc.getSelectedFile();
@@ -257,12 +287,62 @@ public class MainFrame extends JFrame {
         	}
         }
     }
+    
+    private void saveMenuItemActionPerformed(ActionEvent evt) {
+        if(selected==null || selected.size()==0 || isSaved){
+        	JOptionPane.showMessageDialog(null, "No results need to be saved!","Already Saved",JOptionPane.WARNING_MESSAGE);
+        	saveMenuItem.setEnabled(false);
+        	return;
+        }
+        else{
+        	JFileChooser jfc= new JFileChooser();
+        	jfc.setCurrentDirectory(new File("."));//set current directory as default
+        	int retVal = jfc.showSaveDialog(this);
+        	if(retVal == JFileChooser.APPROVE_OPTION){
+        		File file = jfc.getSelectedFile();
+        		BufferedWriter br = null;
+        		try{
+        			br = new BufferedWriter(new FileWriter(file));
+        			Iterator<String> iter = selected.iterator();
+        			while(iter.hasNext()){
+        				br.write(iter.next());
+        				br.newLine();
+        			}
+        			br.flush();
+        			br.close();
+        			isSaved=true;
+        			saveMenuItem.setEnabled(false);
+        			
+        		}catch(IOException ex){
+        			ex.printStackTrace();
+        		}
+        	}
+        }
+    }
+    
    
     /**
     * @param args the command line arguments
     */
     public static void main(String args[]) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
+    	//change lookAndFeel
+    	/*try {
+    	    for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+    	        if ("Nimbus".equals(info.getName())) {
+    	            UIManager.setLookAndFeel(info.getClassName());
+    	            break;
+    	        }
+    	    }
+    	} catch (UnsupportedLookAndFeelException e) {
+    	    
+    	} catch (ClassNotFoundException e) {
+    	    
+    	} catch (InstantiationException e) {
+    	    
+    	} catch (IllegalAccessException e) {
+    	    
+    	}*/
+        EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new MainFrame().setVisible(true);
             }
@@ -279,13 +359,16 @@ public class MainFrame extends JFrame {
     private JPanel jPanel2;
     private Separator jSeparator1;
     private JMenuItem loadMenuItem;
+    private JMenuItem saveMenuItem;
     private JButton startButton;
     private JButton stopButton;
     JLabel congLabel;
     JLabel picLabel;
     Vector<String> names;
+    Vector<String> selected;
     ShufflingThread thread;
     int index;
+    boolean isSaved;
     // End of variables declaration
 
 }
