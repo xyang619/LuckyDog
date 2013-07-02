@@ -14,5 +14,5 @@ if you use Eclipse or other IDE, you need to load the dependencies.
 
 If compile from command line, please specify the swing-layout-1.0.4.jar as follows:
 
-javac -classpath .;swing-layout-1.0.4.jar
+javac -classpath .;swing-layout-1.0.4.jar MainFrame.java
 
